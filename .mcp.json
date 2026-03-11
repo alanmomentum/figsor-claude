@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "figsor": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "figsor"]
+    }
+  }
+}

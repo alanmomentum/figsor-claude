@@ -1,12 +1,27 @@
-# Figsor
+# Figsor-Claude
 
-**Chat in Cursor. Design in Figma.**
+**Chat in Claude Code. Design in Figma.**
 
-Figsor is an MCP server that bridges [Cursor AI](https://cursor.sh) to [Figma](https://www.figma.com), enabling chat-driven design creation and editing — directly on your Figma canvas.
+This is a fork of [Figsor](https://github.com/AsifKabirAntu/figsor) by [Asif Kabir](https://github.com/AsifKabirAntu), adapted for use with [Claude Code](https://docs.anthropic.com/en/docs/claude-code) instead of (or in addition to) Cursor.
+
+Figsor is an MCP server that bridges your AI coding assistant to [Figma](https://www.figma.com), enabling chat-driven design creation and editing — directly on your Figma canvas.
 
 ```
-Cursor → MCP (stdio) → Figsor Server → WebSocket → Figma Plugin → Design on Canvas
+Claude Code → MCP (stdio) → Figsor Server → WebSocket → Figma Plugin → Design on Canvas
 ```
+
+> **Attribution:** All credit for Figsor goes to [Asif Kabir](https://github.com/AsifKabirAntu). This fork only adds documentation and configuration for Claude Code users. The server code is unchanged. If you find Figsor useful, consider supporting the original author with [Figsor Pro](https://asifkabirantu.gumroad.com/l/oxoopm).
+
+---
+
+## What This Fork Adds
+
+- **Claude Code setup guide** — MCP configuration via `claude mcp add` or `.mcp.json`
+- **`for-claude.md`** — detailed usage notes, prompt templates, and troubleshooting for Claude Code
+- **`CHEATSHEET.md`** — quick-reference card for daily use
+- **No code changes** — the Figsor server and Figma plugin are identical to upstream
+
+---
 
 ## Setup
 
@@ -15,14 +30,42 @@ Cursor → MCP (stdio) → Figsor Server → WebSocket → Figma Plugin → Desi
 Clone this repo and import the plugin into Figma:
 
 ```bash
-git clone https://github.com/asifkabir/figsor.git
+git clone https://github.com/alanmomentum/figsor-claude.git
 ```
 
-In Figma: **Plugins → Development → Import plugin from manifest** → select `figsor/figma-plugin/manifest.json`
+In Figma: **Plugins → Development → Import plugin from manifest** → select `figsor-claude/figma-plugin/manifest.json`
 
-### 2. Add to Cursor
+### 2. Add to Claude Code
 
-Open your Cursor MCP settings and add:
+The recommended way:
+
+```bash
+claude mcp add --transport stdio --scope project figsor -- npx -y figsor
+```
+
+Or for all projects:
+
+```bash
+claude mcp add --transport stdio --scope user figsor -- npx -y figsor
+```
+
+Alternatively, add a `.mcp.json` file to your project root:
+
+```json
+{
+  "mcpServers": {
+    "figsor": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "figsor"]
+    }
+  }
+}
+```
+
+### 3. Add to Cursor (Optional)
+
+If you also use Cursor, add to your Cursor MCP settings:
 
 ```json
 {
@@ -35,17 +78,38 @@ Open your Cursor MCP settings and add:
 }
 ```
 
-### 3. Start Designing
+### 4. Start Designing
 
 1. Open a Figma file
 2. Run the Figsor plugin (Plugins → Development → Figsor)
-3. Chat in Cursor:
+3. Chat in Claude Code:
 
-> "Create a mobile login screen with email and password fields"
+> "Use the Figsor MCP server. Call get_connection_status, then get_design_craft_guide('skill'). Create a mobile login screen with email and password fields in Frame 1."
 
-> "Design a dashboard with a sidebar, KPI cards, and charts"
+---
 
-> "Edit the selected frame — make the button rounded and change the color to blue"
+## Claude Code Tips
+
+- **Always start** by calling `get_connection_status` to verify the plugin is connected
+- **Always load** `get_design_craft_guide("skill")` before designing — it contains spacing, color, and typography rules
+- **Turn Peer Design off** for simple tasks (drawing shapes, editing nodes, changing colors)
+- **Use `#111111` for text**, not pure black — this is a Figsor design craft rule
+- **Use frames + auto-layout** for containers, with 4px or 8px spacing
+- **One client at a time** — don't run Cursor and Claude Code against the same Figsor port simultaneously
+
+See [`for-claude.md`](for-claude.md) for the full guide and prompt templates, or [`CHEATSHEET.md`](CHEATSHEET.md) for a quick reference.
+
+### Port Conflict Fix
+
+If you get `EADDRINUSE` or the server disappears:
+
+```bash
+lsof -tiTCP:3055 -sTCP:LISTEN | xargs kill
+```
+
+Then restart the Claude MCP session once.
+
+---
 
 ## Available Tools (45+)
 
@@ -146,13 +210,13 @@ Connect your Figma design system libraries so the AI uses YOUR components, not g
 - Save & switch between libraries
 - Generate designs with your DS
 
-**[Get Figsor Pro →](https://asifkabirantu.gumroad.com/l/oxoopm)** — $9 one-time purchase
+**[Get Figsor Pro →](https://asifkabirantu.gumroad.com/l/oxoopm)** — $9 one-time purchase (supports the original author)
 
 ## Requirements
 
 - **Node.js** 18 or later
 - **Figma** desktop or web app
-- **Cursor** IDE with MCP support
+- **Claude Code** with MCP support (and/or Cursor)
 
 ## Configuration
 
@@ -163,3 +227,5 @@ Connect your Figma design system libraries so the AI uses YOUR components, not g
 ## License
 
 MIT © [Asif Kabir](https://github.com/AsifKabirAntu)
+
+This fork is maintained by [@alanmomentum](https://github.com/alanmomentum).
